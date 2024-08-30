@@ -1,0 +1,107 @@
+let player;
+let obstacles = [];
+let score = 0;
+
+function setup() {
+  createCanvas(400, 400);
+  player = new Player();
+  setInterval(addObstacle, 1000); // Adiciona um novo obstáculo a cada segundo
+}
+
+function draw() {
+  background(220);
+
+  // Move e desenha o jogador
+  player.move();
+  player.display();
+
+  // Desenha e move os obstáculos
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    obstacles[i].display();
+    obstacles[i].move();
+
+    // Verifica colisões entre o jogador e os obstáculos
+    if (player.hits(obstacles[i])) {
+      gameOver();
+    }
+
+    // Remove obstáculos fora da tela
+    if (obstacles[i].offscreen()) {
+      obstacles.splice(i, 1);
+      score++;
+    }
+  }
+
+  // Exibe a pontuação na tela
+  textSize(20);
+  fill(0);
+  text("Score: " + score, 10, 30);
+}
+
+function addObstacle() {
+  obstacles.push(new Obstacle());
+}
+
+function gameOver() {
+  noLoop(); // Para o loop de desenho
+  textSize(32);
+  fill(255, 0, 0);
+  textAlign(CENTER, CENTER);
+  text("Game Over!", width / 2, height / 2);
+}
+
+class Player {
+  constructor() {
+    this.width = 50;
+    this.height = 10;
+    this.x = width / 2 - this.width / 2;
+    this.y = height - 20;
+    this.speed = 5;
+  }
+
+  move() {
+    if (keyIsDown(LEFT_ARROW) && this.x > 0) {
+      this.x -= this.speed;
+    } else if (keyIsDown(RIGHT_ARROW) && this.x < width - this.width) {
+      this.x += this.speed;
+    }
+  }
+
+  display() {
+    fill(0, 0, 255);
+    rect(this.x, this.y, this.width, this.height);
+  }
+
+  hits(obstacle) {
+    return (
+      this.x < obstacle.x + obstacle.width &&
+      this.x + this.width > obstacle.x &&
+      this.y < obstacle.y + obstacle.height &&
+      this.y + this.height > obstacle.y
+    );
+  }
+}
+
+class Obstacle {
+  constructor() {
+    this.width = random(20, 50);
+    this.height = 20;
+    this.x = random(width - this.width);
+    this.y = 0;
+    this.speed = 3;
+  }
+
+  move() {
+    this.y += this.speed;
+  }
+
+  display() {
+    fill(255, 0, 0);
+    rect(this.x, this.y, this.width, this.height);
+  }
+
+  offscreen() {
+    return this.y > height;
+  }
+}
+
